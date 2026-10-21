@@ -22,7 +22,7 @@ export const VIDEO_FORMAT_RULES = dedent`
 
 	The video settings behind this:
 	- startFrame="none" starts each video fresh, and startFrame="previous" continues from the previous video element's last frame. Use both appropriately so the story flows and the videos join smoothly.
-	- continuity="true" (the default) shows a video the beginning and middle frames of the visual before it, so it keeps that place, light and look. Set continuity="false" when the video moves somewhere new.
+	- continuity="false" (the default) gives each video a fresh look. Set continuity="true" to show the beginning and middle frames of the visual before it when the place, light and look should carry over.
 	- A visual stays on screen while it plays or while the speech after it is playing, whichever ends later. An image has no length of its own; a video plays in full.
 	- A video ending on a shot that is extended by the next video's first shot must be longer than any speech after it. Otherwise the picture jumps and continuity is broken.
 	- loop="true" (the default) repeats a video while the speech under it runs longer; "false" holds its last frame.
