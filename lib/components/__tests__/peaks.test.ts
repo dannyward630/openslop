@@ -73,7 +73,7 @@ describe("loadPeaks", () => {
 			"AudioContext",
 			class {
 				async decodeAudioData() {
-					return { getChannelData: () => samples };
+					return { duration: 4, getChannelData: () => samples };
 				}
 			},
 		);
@@ -85,10 +85,11 @@ describe("loadPeaks", () => {
 			})),
 		);
 
-		const peaks = await loadPeaks("https://example.com/audio.mp3");
+		const decoded = await loadPeaks("https://example.com/audio.mp3");
 
-		expect(peaks).toHaveLength(200);
-		expect(Math.max(...peaks)).toBe(1);
+		expect(decoded.peaks).toHaveLength(200);
+		expect(Math.max(...decoded.peaks)).toBe(1);
+		expect(decoded.durationSec).toBe(4);
 	});
 
 	it("throws when the audio cannot be fetched", async () => {

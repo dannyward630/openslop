@@ -2,6 +2,8 @@ import { memoAsync } from "@/lib/memo-async";
 
 export const PEAK_COUNT = 200;
 
+export type DecodedAudio = { peaks: number[]; durationSec: number };
+
 let sharedAudioContext: AudioContext | null = null;
 const getAudioContext = () => (sharedAudioContext ??= new AudioContext());
 
@@ -29,7 +31,7 @@ export function extractPeaks(data: Float32Array, count: number): number[] {
 /** Asset URLs are immutable, so a source is decoded once. */
 export const loadPeaks = memoAsync(decodePeaks, (src) => src);
 
-async function decodePeaks(src: string): Promise<number[]> {
+async function decodePeaks(src: string): Promise<DecodedAudio> {
 	const response = await fetch(src, { mode: "cors" });
 	if (!response.ok) {
 		throw new Error(`Failed to fetch audio: ${response.status}`);
@@ -37,5 +39,8 @@ async function decodePeaks(src: string): Promise<number[]> {
 	const audio = await getAudioContext().decodeAudioData(
 		await response.arrayBuffer(),
 	);
-	return extractPeaks(audio.getChannelData(0), PEAK_COUNT);
+	return {
+		peaks: extractPeaks(audio.getChannelData(0), PEAK_COUNT),
+		durationSec: audio.duration,
+	};
 }
