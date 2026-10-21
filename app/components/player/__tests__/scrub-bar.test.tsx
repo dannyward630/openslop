@@ -3,7 +3,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { ScrubBar, segmentStyle } from "../scrub-bar";
+import { ScrubBar, segmentStyle, type ScrubSegment } from "../scrub-bar";
 
 type Vars = Record<string, unknown>;
 
@@ -49,7 +49,11 @@ describe("ScrubBar", () => {
 	});
 
 	const render = (
-		props: { disabled?: boolean; segments?: []; ariaValueText?: string } = {},
+		props: {
+			disabled?: boolean;
+			segments?: ScrubSegment[];
+			ariaValueText?: string;
+		} = {},
 	) => {
 		act(() =>
 			root.render(
@@ -120,5 +124,24 @@ describe("ScrubBar", () => {
 		const slider = render({ segments: [] });
 
 		expect(slider.querySelectorAll(".bg-scrub-track")).toHaveLength(1);
+	});
+
+	it("keeps visual segment separators out of the time scale", () => {
+		const slider = render({
+			segments: [
+				{ id: "a", basis: 0.25 },
+				{ id: "b", basis: 0.5 },
+				{ id: "c", basis: 0.25 },
+			],
+		});
+		const track = slider.querySelector(".h-1.w-full");
+		const separators = [...slider.querySelectorAll("div")].filter(
+			(element) =>
+				element.classList.contains("w-0.5") &&
+				element.classList.contains("bg-background"),
+		);
+
+		expect(track?.classList.contains("gap-0")).toBe(true);
+		expect(separators).toHaveLength(2);
 	});
 });

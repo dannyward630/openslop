@@ -3,7 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { seekKeyStep } from "@/lib/components/slider-keys";
 import { clamp } from "@/lib/utils";
-import { toSeconds } from "@/lib/render/frames";
+import {
+	frameToRatio,
+	ratioToTime,
+	toFrames,
+	toSeconds,
+} from "@/lib/render/frames";
 import { findSegmentIndexAtFrame } from "@/lib/render/scene-segments";
 import { formatTime } from "@/lib/render/timestamps";
 import { usePlayerControl } from "./player-control-context";
@@ -19,9 +24,14 @@ export function SegmentedSeekBar() {
 	const { player } = usePlayerControl();
 	const { layout, segments } = useLayout();
 	const { totalDurationSec, totalFrames } = layout;
-	const toScrubFrame = (ratio: number) => Math.round(ratio * (totalFrames - 1));
+	const toScrubFrame = (ratio: number) =>
+		clamp(
+			toFrames(ratioToTime(ratio, totalDurationSec), layout.fps),
+			0,
+			totalFrames - 1,
+		);
 	const frame = usePlayerFrame();
-	const progress = clamp(frame / Math.max(1, totalFrames - 1), 0, 1);
+	const progress = frameToRatio(frame, layout.fps, totalDurationSec);
 
 	const [hover, setHover] = useState<ScrubHover | null>(null);
 	// Pulling a frame per segment the pointer sweeps across is wasted work, so
@@ -74,7 +84,7 @@ export function SegmentedSeekBar() {
 				<SeekTooltip
 					x={hover.x}
 					containerWidth={hover.width}
-					timeSec={hover.ratio * totalDurationSec}
+					timeSec={ratioToTime(hover.ratio, totalDurationSec)}
 					label={hoverSegment.label}
 					thumbnail={thumbnailSegment?.thumbnail ?? null}
 				/>

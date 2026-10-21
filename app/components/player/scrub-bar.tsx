@@ -152,9 +152,7 @@ export function ScrubBar({
 	const track = useMemo(() => {
 		const styles = segmentStyle(parts);
 		return (
-			<div
-				className={cn("flex h-1 w-full", continuous ? "gap-0" : "gap-[2px]")}
-			>
+			<div className="flex h-1 w-full gap-0">
 				{parts.map(({ id }, index) => (
 					<div
 						key={id}
@@ -172,6 +170,12 @@ export function ScrubBar({
 							className="absolute inset-y-0 left-0 bg-scrub-progress"
 							style={progressFill}
 						/>
+						{!continuous && index < parts.length - 1 ? (
+							<div
+								aria-hidden="true"
+								className="pointer-events-none absolute inset-y-0 right-0 z-10 w-0.5 bg-background"
+							/>
+						) : null}
 					</div>
 				))}
 			</div>
