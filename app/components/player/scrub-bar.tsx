@@ -9,6 +9,7 @@ import {
 	useRef,
 	useState,
 } from "react";
+import chunk from "lodash/chunk";
 import { sliderKeyTarget } from "@/lib/components/slider-keys";
 import { usePointerDrag } from "@/lib/components/use-pointer-drag";
 import { clamp, cn } from "@/lib/utils";
@@ -50,6 +51,8 @@ export const SCRUB_BAR_HEIGHT = "h-5";
 
 const NO_BREAKS: readonly number[] = [];
 const BREAK_HALF_WIDTH_PX = 1;
+// Chrome misplaces hard stops in a gradient with more than ~128 stops (4 per break).
+const BREAKS_PER_MASK_LAYER = 30;
 
 const fillTo = (ratio: string): CSSProperties => ({
 	width: `calc(var(${ratio}) * 100%)`,
@@ -59,8 +62,7 @@ const previewFill = fillTo("--scrub-preview");
 const progressFill = fillTo("--scrub-pos");
 const thumbStyle: CSSProperties = { left: "calc(var(--scrub-pos) * 100%)" };
 
-/** Cuts a transparent notch at each break without taking width from the track. */
-export function breakMask(breaks: readonly number[]): string {
+function notchLayer(breaks: readonly number[]): string {
 	const notches = breaks.flatMap((at) => {
 		const before = `calc(${at * 100}% - ${BREAK_HALF_WIDTH_PX}px)`;
 		const after = `calc(${at * 100}% + ${BREAK_HALF_WIDTH_PX}px)`;
@@ -72,6 +74,16 @@ export function breakMask(breaks: readonly number[]): string {
 		];
 	});
 	return `linear-gradient(to right, ${["#000", ...notches, "#000"].join(", ")})`;
+}
+
+/**
+ * Cuts a transparent notch at each break without taking width from the track,
+ * as layers the track intersects.
+ */
+export function breakMask(breaks: readonly number[]): string {
+	return (
+		chunk(breaks, BREAKS_PER_MASK_LAYER).map(notchLayer).join(", ") || "none"
+	);
 }
 
 /**
@@ -142,7 +154,7 @@ export function ScrubBar({
 	const track = useMemo(() => {
 		return (
 			<div
-				className="relative h-1 w-full overflow-hidden rounded-full bg-scrub-track"
+				className="relative h-1 w-full overflow-hidden rounded-full bg-scrub-track mask-intersect"
 				style={{ maskImage: breakMask(breaks) }}
 			>
 				<div

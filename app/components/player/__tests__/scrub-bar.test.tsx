@@ -18,8 +18,17 @@ describe("breakMask", () => {
 		);
 	});
 
-	it("leaves a track without breaks whole", () => {
-		expect(breakMask([])).toBe("linear-gradient(to right, #000, #000)");
+	it("leaves a track without breaks unmasked", () => {
+		expect(breakMask([])).toBe("none");
+	});
+
+	it("splits many breaks across layers Chrome can draw exactly", () => {
+		const breaks = Array.from({ length: 94 }, (_, i) => (i + 1) / 95);
+		const layers = breakMask(breaks).split("linear-gradient").slice(1);
+
+		expect(
+			layers.map((layer) => layer.split("transparent").length - 1),
+		).toEqual([60, 60, 60, 8]);
 	});
 });
 
