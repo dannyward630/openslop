@@ -3,29 +3,23 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { ScrubBar, segmentStyle, type ScrubSegment } from "../scrub-bar";
-
-type Vars = Record<string, unknown>;
+import { breakMask, ScrubBar } from "../scrub-bar";
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 
-describe("segmentStyle", () => {
-	it("lays segments end to end by their basis", () => {
-		const styles = segmentStyle([
-			{ id: "a", basis: 0.25 },
-			{ id: "b", basis: 0.5 },
-			{ id: "c", basis: 0.25 },
-		]) as Vars[];
-
-		expect(styles.map((s) => s.flexBasis)).toEqual(["25%", "50%", "25%"]);
-		expect(styles.map((s) => s["--seg-start"])).toEqual([0, 0.25, 0.75]);
-		expect(styles.map((s) => s["--seg-scale"])).toEqual([4, 2, 4]);
+describe("breakMask", () => {
+	it("cuts a 2px notch centred on each break", () => {
+		expect(breakMask([0.25, 0.75])).toBe(
+			"linear-gradient(to right, #000, " +
+				"#000 calc(25% - 1px), transparent calc(25% - 1px), " +
+				"transparent calc(25% + 1px), #000 calc(25% + 1px), " +
+				"#000 calc(75% - 1px), transparent calc(75% - 1px), " +
+				"transparent calc(75% + 1px), #000 calc(75% + 1px), #000)",
+		);
 	});
 
-	it("keeps a zero-width segment's scale finite", () => {
-		const [zero] = segmentStyle([{ id: "a", basis: 0 }]) as Vars[];
-
-		expect(zero["--seg-scale"]).toBe(0);
+	it("leaves a track without breaks whole", () => {
+		expect(breakMask([])).toBe("linear-gradient(to right, #000, #000)");
 	});
 });
 
@@ -51,7 +45,7 @@ describe("ScrubBar", () => {
 	const render = (
 		props: {
 			disabled?: boolean;
-			segments?: ScrubSegment[];
+			breaks?: number[];
 			ariaValueText?: string;
 		} = {},
 	) => {
@@ -120,28 +114,12 @@ describe("ScrubBar", () => {
 		expect(calls).toEqual([]);
 	});
 
-	it("draws an empty segment list as one continuous track", () => {
-		const slider = render({ segments: [] });
+	it("fills one linear track whatever its breaks", () => {
+		const slider = render({ breaks: [0.1, 0.2, 0.3] });
+		const fill = slider.querySelector<HTMLElement>(".bg-scrub-progress");
 
 		expect(slider.querySelectorAll(".bg-scrub-track")).toHaveLength(1);
-	});
-
-	it("keeps visual segment separators out of the time scale", () => {
-		const slider = render({
-			segments: [
-				{ id: "a", basis: 0.25 },
-				{ id: "b", basis: 0.5 },
-				{ id: "c", basis: 0.25 },
-			],
-		});
-		const track = slider.querySelector(".h-1.w-full");
-		const separators = [...slider.querySelectorAll("div")].filter(
-			(element) =>
-				element.classList.contains("w-0.5") &&
-				element.classList.contains("bg-background"),
-		);
-
-		expect(track?.classList.contains("gap-0")).toBe(true);
-		expect(separators).toHaveLength(2);
+		expect(fill?.style.width).toBe("calc(var(--scrub-pos) * 100%)");
+		expect(slider.style.getPropertyValue("--scrub-pos")).toBe("0.5");
 	});
 });

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, type RefObject } from "react";
-import { frameToRatio } from "@/lib/render/frames";
 import { usePlayerFrame } from "../use-player-state";
 import { useLayout } from "../render-layout-context";
 
@@ -40,8 +39,7 @@ export function TimelinePlayhead({
 }) {
 	const { layout } = useLayout();
 	const frame = usePlayerFrame();
-	const progress = frameToRatio(frame, layout.fps, layout.totalDurationSec);
-	const x = progress * layout.totalDurationSec * pxPerSec;
+	const x = (frame / layout.fps) * pxPerSec;
 	useFollow(viewport, x, leadingInset, viewportWidth, scrollable);
 
 	return (
