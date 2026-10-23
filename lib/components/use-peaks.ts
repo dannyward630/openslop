@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { loadPeaks, type DecodedAudio } from "./peaks";
+import { loadPeaks } from "./peaks";
 
 export type PeaksDecode =
 	| { status: "loading" }
-	| ({ status: "ready" } & DecodedAudio)
+	| { status: "ready"; peaks: number[] }
 	| { status: "failed" };
 
 const LOADING: PeaksDecode = { status: "loading" };
@@ -20,9 +20,8 @@ export function usePeaks(src: string): PeaksDecode {
 	useEffect(() => {
 		let cancelled = false;
 		loadPeaks(src)
-			.then((decoded) => {
-				if (!cancelled)
-					setDecoded({ src, decode: { status: "ready", ...decoded } });
+			.then((peaks) => {
+				if (!cancelled) setDecoded({ src, decode: { status: "ready", peaks } });
 			})
 			.catch((error) => {
 				console.error("Failed to decode audio:", error);

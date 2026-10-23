@@ -16,23 +16,14 @@ const SAMPLE_RANGE = { min: 8, max: PEAK_COUNT };
 /** Mask-painted so it takes the text colour; the clip's frame crops it to the trim. */
 export function ClipWaveform({
 	src,
-	mediaDurationSec,
-	trimStartSec,
-	pxPerSec,
+	width,
+	offset,
 }: {
 	src: string;
-	mediaDurationSec: number;
-	trimStartSec: number;
-	pxPerSec: number;
+	width: number;
+	offset: number;
 }) {
 	const decode = usePeaks(src);
-	// Provider metadata can include timeline-only padding absent from the file.
-	const waveformDurationSec =
-		decode.status === "ready"
-			? Math.min(decode.durationSec, mediaDurationSec)
-			: mediaDurationSec;
-	const width = waveformDurationSec * pxPerSec;
-	const offset = trimStartSec * pxPerSec;
 	const sampleCount = clamp(
 		Math.round(width / SAMPLE_SPACING_PX / SAMPLE_QUANTUM) * SAMPLE_QUANTUM,
 		SAMPLE_RANGE.min,

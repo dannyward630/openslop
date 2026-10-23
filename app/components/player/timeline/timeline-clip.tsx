@@ -145,9 +145,8 @@ export function TimelineClip({
 					<Preview>
 						<ClipWaveform
 							src={element.url}
-							mediaDurationSec={element.mediaDurationSec}
-							trimStartSec={trim.trimStartSec}
-							pxPerSec={pxPerSec}
+							width={element.mediaDurationSec * pxPerSec}
+							offset={trim.trimStartSec * pxPerSec}
 						/>
 					</Preview>
 				) : (
