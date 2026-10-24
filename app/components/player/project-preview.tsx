@@ -91,9 +91,8 @@ export function ProjectPreview({
 			</ToastErrorBoundary>
 			<button
 				type="button"
-				tabIndex={-1}
 				aria-label="Play or pause"
-				className="absolute inset-0 cursor-pointer"
+				className="absolute inset-0 cursor-pointer focus-ring"
 				onClick={toggleAndFlash}
 			/>
 			<PlayPauseFlash flash={flash} />

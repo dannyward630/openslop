@@ -59,7 +59,6 @@ export function SortableItem({
 		<div {...nodeAttributes} className={wrapperClassName} style={wrapperStyle}>
 			<div
 				className={cn(styles.sortable, innerClassName)}
-				{...sortableAttributes}
 				ref={setNodeRef}
 				style={{
 					transition,
@@ -77,7 +76,10 @@ export function SortableItem({
 							contentEditable={false}
 						>
 							{insertMenu}
-							<DragHandle listeners={listeners} />
+							<DragHandle
+								attributes={sortableAttributes}
+								listeners={listeners}
+							/>
 						</div>
 					)}
 					<div contentEditable={readOnly ? false : undefined}>{children}</div>
