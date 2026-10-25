@@ -92,7 +92,7 @@ export function ProjectPreview({
 			<button
 				type="button"
 				aria-label="Play or pause"
-				className="absolute inset-0 cursor-pointer focus-ring"
+				className="absolute inset-0 cursor-pointer focus-ring focus-visible:ring-inset"
 				onClick={toggleAndFlash}
 			/>
 			<PlayPauseFlash flash={flash} />

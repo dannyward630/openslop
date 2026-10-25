@@ -38,4 +38,5 @@ it("keeps the play surface in the keyboard tab order", () => {
 	expect(playButton?.hasAttribute("tabindex")).toBe(false);
 	expect(playButton?.tabIndex).toBe(0);
 	expect(playButton?.className).toContain("focus-ring");
+	expect(playButton?.className).toContain("focus-visible:ring-inset");
 });
