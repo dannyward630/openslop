@@ -42,6 +42,7 @@ export function SortableItem({
 	const {
 		listeners,
 		setNodeRef,
+		setActivatorNodeRef,
 		transform,
 		transition,
 		isDragging,
@@ -77,6 +78,7 @@ export function SortableItem({
 						>
 							{insertMenu}
 							<DragHandle
+								ref={setActivatorNodeRef}
 								attributes={sortableAttributes}
 								listeners={listeners}
 							/>

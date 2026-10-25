@@ -21,12 +21,21 @@ let root: Root;
 let editor: Editor;
 const container = document.body.appendChild(document.createElement("div"));
 
-function SortableScene({ id }: { id: string }) {
+function SortableScene({
+	id,
+	includeInsertMenu = false,
+}: {
+	id: string;
+	includeInsertMenu?: boolean;
+}) {
 	return (
 		<SortableItem
 			sceneId={id}
 			sortableType="scene"
 			wrapperClassName={`test-${id}`}
+			insertMenu={
+				includeInsertMenu ? <button type="button">+</button> : undefined
+			}
 			attributes={{} as RenderElementProps["attributes"]}
 			block={scene([content("image", `${id}-image`)], id)}
 		>
@@ -35,7 +44,11 @@ function SortableScene({ id }: { id: string }) {
 	);
 }
 
-function KeyboardSortingProbe() {
+function KeyboardSortingProbe({
+	includeInsertMenu = false,
+}: {
+	includeInsertMenu?: boolean;
+}) {
 	const {
 		sceneItems,
 		sensors: canvasSensors,
@@ -58,7 +71,11 @@ function KeyboardSortingProbe() {
 				strategy={verticalListSortingStrategy}
 			>
 				{sceneItems.map((id) => (
-					<SortableScene key={id} id={id} />
+					<SortableScene
+						key={id}
+						id={id}
+						includeInsertMenu={includeInsertMenu}
+					/>
 				))}
 			</SortableContext>
 		</DndContext>
@@ -83,15 +100,15 @@ async function mountCanvas(children: ReactNode) {
 	);
 }
 
-afterEach(() => act(() => root.unmount()));
-
-it("reorders scenes with the keyboard", async () => {
-	await mountCanvas(<KeyboardSortingProbe />);
-	const handles = Array.from(
+function dragHandles() {
+	return Array.from(
 		container.querySelectorAll<HTMLButtonElement>(
 			'button[aria-label="Drag to reorder"]',
 		),
 	);
+}
+
+function setSortableBounds(handles: HTMLButtonElement[]) {
 	handles.forEach((handle, index) => {
 		const sortable = handle.parentElement?.parentElement?.parentElement;
 		if (!sortable) throw new Error("drag handle is missing its sortable item");
@@ -110,6 +127,28 @@ it("reorders scenes with the keyboard", async () => {
 			}),
 		});
 	});
+}
+
+async function pressKey(target: EventTarget, code: string, key: string) {
+	await act(async () => {
+		target.dispatchEvent(
+			new KeyboardEvent("keydown", {
+				bubbles: true,
+				cancelable: true,
+				code,
+				key,
+			}),
+		);
+		await new Promise((resolve) => setTimeout(resolve, 0));
+	});
+}
+
+afterEach(() => act(() => root.unmount()));
+
+it("reorders scenes with the keyboard", async () => {
+	await mountCanvas(<KeyboardSortingProbe />);
+	const handles = dragHandles();
+	setSortableBounds(handles);
 
 	const [firstHandle] = handles;
 	const instructionId = firstHandle.getAttribute("aria-describedby");
@@ -118,32 +157,29 @@ it("reorders scenes with the keyboard", async () => {
 		"To pick up a draggable item",
 	);
 	firstHandle.focus();
-	const keydown = (code: string, key: string) =>
-		new KeyboardEvent("keydown", {
-			bubbles: true,
-			cancelable: true,
-			code,
-			key,
-		});
-
-	await act(async () => {
-		firstHandle.dispatchEvent(keydown("Space", " "));
-		await new Promise((resolve) => setTimeout(resolve, 0));
-	});
+	await pressKey(firstHandle, "Space", " ");
 	expect(document.body.textContent).toContain(
 		"Draggable item scene-1 was moved over droppable area scene-1.",
 	);
-	await act(async () => {
-		document.dispatchEvent(keydown("ArrowDown", "ArrowDown"));
-		await new Promise((resolve) => setTimeout(resolve, 0));
-	});
-	await act(async () => {
-		document.dispatchEvent(keydown("Space", " "));
-		await new Promise((resolve) => setTimeout(resolve, 0));
-	});
+	await pressKey(document, "ArrowDown", "ArrowDown");
+	await pressKey(document, "Space", " ");
 
 	expect(editor.children.map((node) => node.id)).toEqual([
 		"scene-2",
 		"scene-1",
 	]);
+});
+
+it("preserves drag-handle focus when another control precedes it", async () => {
+	await mountCanvas(<KeyboardSortingProbe includeInsertMenu />);
+	const handles = dragHandles();
+	setSortableBounds(handles);
+
+	const [firstHandle] = handles;
+	firstHandle.focus();
+	await pressKey(firstHandle, "Space", " ");
+	await pressKey(document, "ArrowDown", "ArrowDown");
+	await pressKey(document, "Space", " ");
+
+	expect(document.activeElement).toBe(firstHandle);
 });

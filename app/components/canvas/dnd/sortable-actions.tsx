@@ -52,12 +52,15 @@ export function InsertMenu<K extends string>({
 export function DragHandle({
 	attributes,
 	listeners,
+	ref,
 }: {
 	attributes?: DraggableAttributes;
 	listeners?: DraggableSyntheticListeners;
+	ref?: React.Ref<HTMLButtonElement>;
 }) {
 	return (
 		<IconButton
+			ref={ref}
 			ariaLabel="Drag to reorder"
 			variant="quiet"
 			className="cursor-grab active:cursor-grabbing"
