@@ -12,7 +12,9 @@ export default function Editor() {
 
 	return (
 		<div
-			onKeyDown={(event) => handleProjectHistoryKeyDown(event, editor)}
+			onKeyDown={(event) =>
+				handleProjectHistoryKeyDown(event.nativeEvent, editor)
+			}
 			className={`flex min-h-screen flex-col items-center transition-[padding] duration-700 ease-out ${
 				showWorkspace ? "" : "pt-[22vh]"
 			}`}

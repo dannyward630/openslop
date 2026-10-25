@@ -1,19 +1,7 @@
 import type { BaseEditor } from "slate";
 import { HistoryEditor } from "slate-history";
 
-type ProjectHistoryKeyEvent = {
-	altKey: boolean;
-	ctrlKey: boolean;
-	defaultPrevented: boolean;
-	isComposing?: boolean;
-	key: string;
-	metaKey: boolean;
-	preventDefault: () => void;
-	shiftKey: boolean;
-	target: EventTarget | null;
-};
-
-function historyAction(event: ProjectHistoryKeyEvent): "undo" | "redo" | null {
+function historyAction(event: KeyboardEvent): "undo" | "redo" | null {
 	if (event.altKey || event.isComposing) return null;
 
 	const key = event.key.toLowerCase();
@@ -34,7 +22,7 @@ function isTextEntryTarget(target: EventTarget | null): boolean {
 }
 
 export function handleProjectHistoryKeyDown(
-	event: ProjectHistoryKeyEvent,
+	event: KeyboardEvent,
 	editor: BaseEditor,
 ): void {
 	if (event.defaultPrevented) return;
