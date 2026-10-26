@@ -73,6 +73,21 @@ describe("project history keymap", () => {
 		expect(undo).not.toHaveBeenCalled();
 	});
 
+	it("handles shortcuts from non-editable controls inside the Slate root", () => {
+		const { boundary, undo } = mountHistoryKeymap();
+		const editable = document.createElement("div");
+		editable.contentEditable = "true";
+		const island = document.createElement("div");
+		island.contentEditable = "false";
+		const button = document.createElement("button");
+		island.append(button);
+		editable.append(island);
+		boundary.append(editable);
+
+		expect(press(button, "z", { ctrlKey: true }).defaultPrevented).toBe(true);
+		expect(undo).toHaveBeenCalledTimes(1);
+	});
+
 	it("lets the Slate editor handle its own shortcut once", () => {
 		const { boundary, editor, undo } = mountHistoryKeymap();
 		const editable = document.createElement("div");

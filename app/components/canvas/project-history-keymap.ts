@@ -13,12 +13,8 @@ function historyAction(event: KeyboardEvent): "undo" | "redo" | null {
 }
 
 function isTextEntryTarget(target: EventTarget | null): boolean {
-	if (!(target instanceof Element)) return false;
-	return Boolean(
-		target.closest(
-			'input, textarea, [contenteditable]:not([contenteditable="false"])',
-		),
-	);
+	if (!(target instanceof HTMLElement)) return false;
+	return target.isContentEditable || target.closest("input, textarea") !== null;
 }
 
 export function handleProjectHistoryKeyDown(
