@@ -66,7 +66,10 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 
 describe("script review opt-in", () => {
 	it("asks before reviewing a new or adapted script", async () => {
-		const systemPrompt = sloppyInstructions({})[0]?.content;
+		const systemPrompt =
+			sloppyInstructions({})[0]?.content.replace(/\s+/g, " ") ?? "";
+		const reviewDescription =
+			SLOPPY_TOOLS.review_script.description.replace(/\s+/g, " ");
 
 		expect(systemPrompt).toContain(
 			"after write_script or adapt_script, ask whether they want a review and finish the turn",
@@ -74,10 +77,10 @@ describe("script review opt-in", () => {
 		expect(systemPrompt).toContain(
 			"Do not call review_script until they say yes or ask for one",
 		);
-		expect(SLOPPY_TOOLS.review_script.description).toContain(
+		expect(reviewDescription).toContain(
 			"when the user explicitly asks for a review or accepts your offer",
 		);
-		expect(SLOPPY_TOOLS.review_script.description).toContain(
+		expect(reviewDescription).toContain(
 			"Do not run it just because you wrote, adapted or edited the script",
 		);
 	});
