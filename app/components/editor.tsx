@@ -1,7 +1,7 @@
 "use client";
 
-import PostPromptView from "./post-prompt-view";
 import PrePromptView from "./pre-prompt-view";
+import PostPromptView from "./post-prompt-view";
 import { useShowWorkspace } from "./canvas/workspace-context";
 
 export default function Editor() {

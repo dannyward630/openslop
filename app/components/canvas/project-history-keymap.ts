@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import isHotkey from "is-hotkey";
-import { ReactEditor, useSlateStatic } from "slate-react";
 import type { CanvasEditor } from "@/lib/canvas/types";
 
 const isUndoHotkey = isHotkey("mod+z");
@@ -23,7 +22,7 @@ function isTextEntryTarget(target: EventTarget | null): boolean {
 	return target instanceof HTMLElement && target.isContentEditable;
 }
 
-export function handleProjectHistoryKeyDown(
+function handleProjectHistoryKeyDown(
 	event: KeyboardEvent,
 	editor: CanvasEditor,
 ): void {
@@ -34,27 +33,12 @@ export function handleProjectHistoryKeyDown(
 	if (!isUndo && !isRedo) return;
 	if (isTextEntryTarget(event.target)) return;
 
-	const targetElement =
-		event.target instanceof Element
-			? event.target
-			: event.target instanceof Node
-				? event.target.parentElement
-				: null;
-	if (
-		targetElement?.closest("[data-slate-editor]") &&
-		ReactEditor.hasEditableTarget(editor, event.target)
-	) {
-		return;
-	}
-
 	event.preventDefault();
 	if (isUndo) editor.undo();
 	else editor.redo();
 }
 
-export function useProjectHistoryHotkeys(): void {
-	const editor = useSlateStatic();
-
+export function useProjectHistoryHotkeys(editor: CanvasEditor): void {
 	useEffect(() => {
 		const onKeyDown = (event: KeyboardEvent) =>
 			handleProjectHistoryKeyDown(event, editor);

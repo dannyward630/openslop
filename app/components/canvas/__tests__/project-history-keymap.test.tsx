@@ -6,6 +6,7 @@ import { createEditor } from "slate";
 import { withHistory } from "slate-history";
 import { Editable, Slate, withReact } from "slate-react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import type { CanvasEditor } from "@/lib/canvas/types";
 import { useProjectHistoryHotkeys } from "../project-history-keymap";
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
@@ -19,8 +20,8 @@ afterEach(() => {
 	vi.restoreAllMocks();
 });
 
-function ProjectHistoryHotkeys() {
-	useProjectHistoryHotkeys();
+function ProjectHistoryHotkeys({ editor }: { editor: CanvasEditor }) {
+	useProjectHistoryHotkeys(editor);
 	return null;
 }
 
@@ -49,7 +50,7 @@ function mountHistoryKeymap() {
 	act(() =>
 		root.render(
 			<Slate editor={editor} initialValue={editor.children}>
-				<ProjectHistoryHotkeys />
+				<ProjectHistoryHotkeys editor={editor} />
 				<Editable />
 			</Slate>,
 		),

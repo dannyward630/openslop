@@ -35,11 +35,6 @@ const CanvasScopedProviders = composeProviders(
 	AssetEditProvider,
 );
 
-function ProjectHistoryHotkeys() {
-	useProjectHistoryHotkeys();
-	return null;
-}
-
 /**
  * Opens the editor session and composes every canvas-scoped provider into a
  * single boundary, so the top-level view stays a flat orchestrator. The
@@ -49,6 +44,7 @@ function ProjectHistoryHotkeys() {
  */
 export function CanvasProviders({ children }: { children: ReactNode }) {
 	const { editor, onDocumentChange, history } = useEditorSession();
+	useProjectHistoryHotkeys(editor);
 
 	return (
 		<Slate
@@ -57,7 +53,6 @@ export function CanvasProviders({ children }: { children: ReactNode }) {
 			onValueChange={onDocumentChange}
 		>
 			<CanvasHistoryProvider history={history}>
-				<ProjectHistoryHotkeys />
 				<CanvasScopedProviders>
 					<ActiveCaptionFont />
 					{children}
